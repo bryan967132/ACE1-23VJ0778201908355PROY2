@@ -704,129 +704,6 @@ continuar_v:
 fin_pintar_mapa:
 		ret
 
-
-;; mapa_quemado - mapa de prueba
-mapa_quemado:
-		mov DL, SUELO
-		mov AH, 2
-		mov AL, 2
-		call colocar_en_mapa
-		mov DL, SUELO
-		mov AH, 3
-		mov AL, 2
-		call colocar_en_mapa
-		mov DL, SUELO
-		mov AH, 4
-		mov AL, 2
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 2
-		mov AL, 3
-		call colocar_en_mapa
-		mov DL, SUELO
-		mov AH, 3
-		mov AL, 3
-		call colocar_en_mapa
-		mov DL, SUELO
-		mov AH, 4
-		mov AL, 3
-		call colocar_en_mapa
-		mov DL, SUELO
-		mov AH, 2
-		mov AL, 4
-		call colocar_en_mapa
-		mov DL, SUELO
-		mov AH, 3
-		mov AL, 4
-		call colocar_en_mapa
-		mov DL, SUELO
-		mov AH, 4
-		mov AL, 4
-		call colocar_en_mapa
-		;;
-		mov DL, JUGADOR
-		mov AH, [xJugador]
-		mov AL, [yJugador]
-		call colocar_en_mapa
-		;;
-		mov DL, CAJA
-		mov AH, 2
-		mov AL, 3
-		call colocar_en_mapa
-		;;
-		mov DL, OBJETIVO
-		mov AH, 4
-		mov AL, 2
-		call colocar_en_mapa
-		;;
-		mov DL, PARED
-		mov AH, 1
-		mov AL, 1
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 2
-		mov AL, 1
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 3
-		mov AL, 1
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 4
-		mov AL, 1
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 5
-		mov AL, 1
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 1
-		mov AL, 2
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 5
-		mov AL, 2
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 1
-		mov AL, 3
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 5
-		mov AL, 3
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 1
-		mov AL, 4
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 5
-		mov AL, 4
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 1
-		mov AL, 5
-		call colocar_en_mapa
-
-		mov DL, PARED
-		mov AH, 2
-		mov AL, 5
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 3
-		mov AL, 5
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 4
-		mov AL, 5
-		call colocar_en_mapa
-		mov DL, PARED
-		mov AH, 5
-		mov AL, 5
-		call colocar_en_mapa
-		ret
-
-
 ;; entrada_juego - manejo de las entradas del juego
 entrada_juego:
 		mov AH, 01
@@ -861,9 +738,32 @@ mover_jugador_arr:
 		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, OBJETIVO
 		je encuentra_objetivo1
+		;; VALIDAR SI SE ENCUENTRA UNA CAJA EN LA SIGUIENTE CASILLA
+		cmp DL, CAJA
+		je encuentra_caja1
 		jmp continuar1
 encuentra_objetivo1:
 		mov [hay_objetivo_sig], 01
+		jmp continuar1
+encuentra_caja1:
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		dec AL
+		push AX
+		call obtener_de_mapa
+		pop AX
+		cmp DL, PARED
+		je no_pasa_arriba
+		inc AL
+		push AX
+		call obtener_de_mapa
+		pop AX
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		mov DL, CAJA
+		dec AL
+		push AX
+		call colocar_en_mapa
+		pop AX
+		inc AL
 continuar1:
 		;; POSICIONAR AL JUGADOR EN EL MAPA
 		mov DL, JUGADOR
@@ -892,6 +792,11 @@ devolver_objetivo1:
 		ret
 hay_pared_arriba:
 		ret
+no_pasa_arriba:
+		inc AL
+		inc AL
+		mov [yJugador], AL
+		ret
 mover_jugador_aba:
 		mov AH, [xJugador]
 		mov AL, [yJugador]
@@ -908,9 +813,32 @@ mover_jugador_aba:
 		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, OBJETIVO
 		je encuentra_objetivo2
+		;; VALIDAR SI SE ENCUENTRA UNA CAJA EN LA SIGUIENTE CASILLA
+		cmp DL, CAJA
+		je encuentra_caja2
 		jmp continuar2
 encuentra_objetivo2:
 		mov[hay_objetivo_sig], 01
+		jmp continuar2
+encuentra_caja2:
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		inc AL
+		push AX
+		call obtener_de_mapa
+		pop AX
+		cmp DL, PARED
+		je no_pasa_abajo
+		dec AL
+		push AX
+		call obtener_de_mapa
+		pop AX
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		mov DL, CAJA
+		inc AL
+		push AX
+		call colocar_en_mapa
+		pop AX
+		dec AL
 continuar2:
 		;; POSICIONAR AL JUGADOR EN EL MAPA
 		mov DL, JUGADOR
@@ -939,6 +867,11 @@ devolver_objetivo2:
 		ret
 hay_pared_abajo:
 		ret
+no_pasa_abajo:
+		dec AL
+		dec AL
+		mov [yJugador], AL
+		ret
 mover_jugador_izq:
 		mov AH, [xJugador]
 		mov AL, [yJugador]
@@ -955,9 +888,32 @@ mover_jugador_izq:
 		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, OBJETIVO
 		je encuentra_objetivo3
+		;; VALIDAR SI SE ENCUENTRA UNA CAJA EN LA SIGUIENTE CASILLA
+		cmp DL, CAJA
+		je encuentra_caja3
 		jmp continuar3
 encuentra_objetivo3:
 		mov[hay_objetivo_sig], 01
+		jmp continuar3
+encuentra_caja3:
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		dec AH
+		push AX
+		call obtener_de_mapa
+		pop AX
+		cmp DL, PARED
+		je no_pasa_izquierda
+		inc AH
+		push AX
+		call obtener_de_mapa
+		pop AX
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		mov DL, CAJA
+		dec AH
+		push AX
+		call colocar_en_mapa
+		pop AX
+		inc AH
 continuar3:
 		;; POSICIONAR AL JUGADOR EN EL MAPA
 		mov DL, JUGADOR
@@ -986,6 +942,11 @@ devolver_objetivo3:
 		ret
 hay_pared_izquierda:
 		ret
+no_pasa_izquierda:
+		inc AH
+		inc AH
+		mov [xJugador], AH
+		ret
 mover_jugador_der:
 		mov AH, [xJugador]
 		mov AL, [yJugador]
@@ -1002,9 +963,32 @@ mover_jugador_der:
 		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, OBJETIVO
 		je encuentra_objetivo4
+		;; VALIDAR SI SE ENCUENTRA UNA CAJA EN LA SIGUIENTE CASILLA
+		cmp DL, CAJA
+		je encuentra_caja4
 		jmp continuar4
 encuentra_objetivo4:
 		mov [hay_objetivo_sig], 01
+		jmp continuar4
+encuentra_caja4:
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		inc AH
+		push AX
+		call obtener_de_mapa
+		pop AX
+		cmp DL, PARED
+		je no_pasa_derecha
+		dec AH
+		push AX
+		call obtener_de_mapa
+		pop AX
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		mov DL, CAJA
+		inc AH
+		push AX
+		call colocar_en_mapa
+		pop AX
+		dec AH
 continuar4:
 		;; POSICIONAR AL JUGADOR EN EL MAPA
 		mov DL, JUGADOR
@@ -1032,6 +1016,11 @@ devolver_objetivo4:
 		call colocar_en_mapa
 		ret
 hay_pared_derecha:
+		ret
+no_pasa_derecha:
+		dec AH
+		dec AH
+		mov [xJugador], AH
 		ret
 fin_entrada_juego:
 		ret
