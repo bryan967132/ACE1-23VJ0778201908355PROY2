@@ -269,7 +269,6 @@ ver_final_de_linea:
 		mov DL, [elemento_actual]
 		mov AH, [xElemento]
 		mov AL, [yElemento]
-		;; EVALUACIÓN DE SOBREPUESTOS
 		call colocar_en_mapa
 		mov AL, JUGADOR
 		cmp AL, [elemento_actual]
@@ -630,22 +629,25 @@ ciclo_h:
 		call obtener_de_mapa
 		pop AX
 		;;
-                cmp DL, NADA
+		cmp DL, NADA
 		je pintar_vacio_mapa
 		;;
-                cmp DL, JUGADOR
+		cmp DL, JUGADOR
 		je pintar_jugador_mapa
 		;;
-                cmp DL, PARED
+		cmp DL, PARED
 		je pintar_pared_mapa
 		;;
-                cmp DL, CAJA
+		cmp DL, CAJA
 		je pintar_caja_mapa
 		;;
-                cmp DL, OBJETIVO
+		cmp DL, OBJETIVO
 		je pintar_objetivo_mapa
 		;;
-                cmp DL, SUELO
+		cmp DL, SOBREPUESTO
+		je pintar_sobrepuesto_mapa
+		;;
+		cmp DL, SUELO
 		je pintar_suelo_mapa
 		;;
 		jmp continuar_h
@@ -697,6 +699,14 @@ pintar_objetivo_mapa:
 		call pintar_sprite
 		pop AX
 		jmp continuar_h
+pintar_sobrepuesto_mapa:
+		push AX
+		call adaptar_coordenada
+		mov SI, offset dim_sprite_caja
+		mov DI, offset data_sprite_caja
+		call pintar_sprite
+		pop AX
+		jmp continuar_h
 continuar_h:
 		inc AH
 		jmp ciclo_h
@@ -740,6 +750,9 @@ mover_jugador_arr:
 		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, OBJETIVO
 		je encuentra_objetivo1
+		;; VALIDAR SI EL DESTINO ES UN SOBREPUESTO
+		cmp DL, SOBREPUESTO
+		je mueve_sobrepuesto1
 		;; VALIDAR SI SE ENCUENTRA UNA CAJA EN LA SIGUIENTE CASILLA
 		cmp DL, CAJA
 		je encuentra_caja1
@@ -753,15 +766,42 @@ encuentra_caja1:
 		push AX
 		call obtener_de_mapa
 		pop AX
+		;; VALIDAR SI HAY PARED DESPUÉS DE LA CAJA
 		cmp DL, PARED
 		je no_pasa_arriba
+		;; VALIDAR SI HAY UN SOBREPUESTO DESPUÉS DE LA CAJA
+		cmp DL, SOBREPUESTO
+		je no_pasa_arriba
+		;; VALIDAR SI HAY OTRA CAJA DESPUÉS DE LA CAJA
 		cmp DL, CAJA
 		je no_pasa_arriba
+		;; VALIDAR SI HAY UN OBJETIVO DESPUÉS DE LA CAJA
+		cmp DL, OBJETIVO
+		je sobreponer1
+		jmp mover_caja1
+sobreponer1:
 		inc AL
 		push AX
 		call obtener_de_mapa
 		pop AX
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		mov DL, SOBREPUESTO
+		dec AL
+		push AX
+		call colocar_en_mapa
+		pop AX
+		inc AL
+		jmp continuar1
+mueve_sobrepuesto1:
+		mov [hay_objetivo_sig], 01
+		jmp encuentra_caja1
+mover_caja1:
+		inc AL
+		push AX
+		call obtener_de_mapa
+		pop AX
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+seguir_moviendo_caja1:
 		mov DL, CAJA
 		dec AL
 		push AX
@@ -795,8 +835,10 @@ devolver_objetivo1:
 		call colocar_en_mapa
 		ret
 hay_pared_arriba:
+		mov [hay_objetivo_sig], 00
 		ret
 no_pasa_arriba:
+		mov [hay_objetivo_sig], 00
 		inc AL
 		inc AL
 		mov [yJugador], AL
@@ -817,6 +859,9 @@ mover_jugador_aba:
 		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, OBJETIVO
 		je encuentra_objetivo2
+		;; VALIDAR SI EL DESTINO ES UN SOBREPUESTO
+		cmp DL, SOBREPUESTO
+		je mueve_sobrepuesto2
 		;; VALIDAR SI SE ENCUENTRA UNA CAJA EN LA SIGUIENTE CASILLA
 		cmp DL, CAJA
 		je encuentra_caja2
@@ -830,15 +875,42 @@ encuentra_caja2:
 		push AX
 		call obtener_de_mapa
 		pop AX
+		;; VALIDAR SI HAY PARED DESPUÉS DE LA CAJA
 		cmp DL, PARED
 		je no_pasa_abajo
+		;; VALIDAR SI HAY UN SOBREPUESTO DESPUÉS DE LA CAJA
+		cmp DL, SOBREPUESTO
+		je no_pasa_abajo
+		;; VALIDAR SI HAY OTRA CAJA DESPUÉS DE LA CAJA
 		cmp DL, CAJA
 		je no_pasa_abajo
+		;; VALIDAR SI HAY UN OBJETIVO DESPUÉS DE LA CAJA
+		cmp DL, OBJETIVO
+		je sobreponer2
+		jmp mover_caja2
+sobreponer2:
 		dec AL
 		push AX
 		call obtener_de_mapa
 		pop AX
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		mov DL, SOBREPUESTO
+		inc AL
+		push AX
+		call colocar_en_mapa
+		pop AX
+		dec AL
+		jmp continuar2
+mueve_sobrepuesto2:
+		mov [hay_objetivo_sig], 01
+		jmp encuentra_caja2
+mover_caja2:
+		dec AL
+		push AX
+		call obtener_de_mapa
+		pop AX
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+seguir_moviendo_caja2:
 		mov DL, CAJA
 		inc AL
 		push AX
@@ -872,8 +944,10 @@ devolver_objetivo2:
 		call colocar_en_mapa
 		ret
 hay_pared_abajo:
+		mov [hay_objetivo_sig], 00
 		ret
 no_pasa_abajo:
+		mov [hay_objetivo_sig], 00
 		dec AL
 		dec AL
 		mov [yJugador], AL
@@ -894,6 +968,9 @@ mover_jugador_izq:
 		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, OBJETIVO
 		je encuentra_objetivo3
+		;; VALIDAR SI EL DESTINO ES UN SOBREPUESTO
+		cmp DL, SOBREPUESTO
+		je mueve_sobrepuesto3
 		;; VALIDAR SI SE ENCUENTRA UNA CAJA EN LA SIGUIENTE CASILLA
 		cmp DL, CAJA
 		je encuentra_caja3
@@ -907,15 +984,42 @@ encuentra_caja3:
 		push AX
 		call obtener_de_mapa
 		pop AX
+		;; VALIDAR SI HAY PARED DESPUÉS DE LA CAJA
 		cmp DL, PARED
 		je no_pasa_izquierda
+		;; VALIDAR SI HAY UN SOBREPUESTO DESPUÉS DE LA CAJA
+		cmp DL, SOBREPUESTO
+		je no_pasa_izquierda
+		;; VALIDAR SI HAY OTRA CAJA DESPUÉS DE LA CAJA
 		cmp DL, CAJA
 		je no_pasa_izquierda
+		;; VALIDAR SI HAY OBJETIVO DESPUÉS DE LA CAJA
+		cmp DL, OBJETIVO
+		je sobreponer3
+		jmp mover_caja3
+sobreponer3:
 		inc AH
 		push AX
 		call obtener_de_mapa
 		pop AX
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		mov DL, SOBREPUESTO
+		dec AH
+		push AX
+		call colocar_en_mapa
+		pop AX
+		inc AH
+		jmp continuar3
+mueve_sobrepuesto3:
+		mov [hay_objetivo_sig], 01
+		jmp encuentra_caja3
+mover_caja3:
+		inc AH
+		push AX
+		call obtener_de_mapa
+		pop AX
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+seguir_moviendo_caja3:
 		mov DL, CAJA
 		dec AH
 		push AX
@@ -949,8 +1053,10 @@ devolver_objetivo3:
 		call colocar_en_mapa
 		ret
 hay_pared_izquierda:
+		mov [hay_objetivo_sig], 00
 		ret
 no_pasa_izquierda:
+		mov [hay_objetivo_sig], 00
 		inc AH
 		inc AH
 		mov [xJugador], AH
@@ -971,6 +1077,9 @@ mover_jugador_der:
 		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, OBJETIVO
 		je encuentra_objetivo4
+		;; VALIDAR SI EL DESTINO ES UN SOBREPUESTO
+		cmp DL, SOBREPUESTO
+		je mueve_sobrepuesto4
 		;; VALIDAR SI SE ENCUENTRA UNA CAJA EN LA SIGUIENTE CASILLA
 		cmp DL, CAJA
 		je encuentra_caja4
@@ -984,15 +1093,42 @@ encuentra_caja4:
 		push AX
 		call obtener_de_mapa
 		pop AX
+		;; VALIDAR SI HAY PARED DESPUÉS DE LA CAJA
 		cmp DL, PARED
 		je no_pasa_derecha
+		;; VALIDAR SI HAY UN SOBREPUESTO DESPUÉS DE LA CAJA
+		cmp DL, SOBREPUESTO
+		je no_pasa_derecha
+		;; VALIDAR SI HAY OTRA CAJA DESPUÉS DE LA CAJA
 		cmp DL, CAJA
 		je no_pasa_derecha
+		;; VALIDAR SI HAY OBJETIVO DESPUÉS DE LA CAJA
+		cmp DL, OBJETIVO
+		je sobreponer4
+		jmp mover_caja4
+sobreponer4:
 		dec AH
 		push AX
 		call obtener_de_mapa
 		pop AX
 		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		mov DL, SOBREPUESTO
+		inc AH
+		push AX
+		call colocar_en_mapa
+		pop AX
+		dec AH
+		jmp continuar4
+mueve_sobrepuesto4:
+		mov [hay_objetivo_sig], 01
+		jmp encuentra_caja4
+mover_caja4:
+		dec AH
+		push AX
+		call obtener_de_mapa
+		pop AX
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+seguir_moviendo_caja4:
 		mov DL, CAJA
 		inc AH
 		push AX
@@ -1026,8 +1162,10 @@ devolver_objetivo4:
 		call colocar_en_mapa
 		ret
 hay_pared_derecha:
+		mov [hay_objetivo_sig], 00
 		ret
 no_pasa_derecha:
+		mov [hay_objetivo_sig], 00
 		dec AH
 		dec AH
 		mov [xJugador], AH
