@@ -755,6 +755,8 @@ encuentra_caja1:
 		pop AX
 		cmp DL, PARED
 		je no_pasa_arriba
+		cmp DL, CAJA
+		je no_pasa_arriba
 		inc AL
 		push AX
 		call obtener_de_mapa
@@ -829,6 +831,8 @@ encuentra_caja2:
 		call obtener_de_mapa
 		pop AX
 		cmp DL, PARED
+		je no_pasa_abajo
+		cmp DL, CAJA
 		je no_pasa_abajo
 		dec AL
 		push AX
@@ -905,6 +909,8 @@ encuentra_caja3:
 		pop AX
 		cmp DL, PARED
 		je no_pasa_izquierda
+		cmp DL, CAJA
+		je no_pasa_izquierda
 		inc AH
 		push AX
 		call obtener_de_mapa
@@ -979,6 +985,8 @@ encuentra_caja4:
 		call obtener_de_mapa
 		pop AX
 		cmp DL, PARED
+		je no_pasa_derecha
+		cmp DL, CAJA
 		je no_pasa_derecha
 		dec AH
 		push AX
