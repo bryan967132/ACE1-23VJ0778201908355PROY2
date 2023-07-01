@@ -63,6 +63,15 @@ data_sprite_caja    db   48, 48, 2d, 2d, 48, 48, 2d, 2d
                     db   48, 6a, 22, 22, 22, 22, 6a, 2d
                     db   2d, 2d, 6a, 6a, 6a, 6a, 48, 48
                     db   2d, 2d, 48, 48, 2d, 2d, 48, 48
+dim_sprite_sobre    db   08, 08
+data_sprite_sobre   db   48, 48, 2d, 2d, 48, 48, 2d, 2d
+                    db   48, 48, 37, 37, 37, 37, 2d, 2d
+                    db   2d, 37, 36, 36, 36, 36, 37, 48
+                    db   2d, 37, 36, 35, 35, 36, 37, 48
+                    db   48, 37, 36, 35, 35, 36, 37, 2d
+                    db   48, 37, 36, 36, 36, 36, 37, 2d
+                    db   2d, 2d, 37, 37, 37, 37, 48, 48
+                    db   2d, 2d, 48, 48, 2d, 2d, 48, 48
 dim_sprite_obj      db   08, 08
 data_sprite_obj     db   48, 48, 2d, 2d, 48, 48, 2d, 2d
                     db   48, 48, 2d, 2d, 48, 48, 2d, 2d
@@ -269,6 +278,31 @@ ver_final_de_linea:
 		mov DL, [elemento_actual]
 		mov AH, [xElemento]
 		mov AL, [yElemento]
+		;; EVALUAR SOBREPUESTO
+		cmp DL, CAJA
+		je evaluarC
+		cmp DL, OBJETIVO
+		je evaluarO
+		jmp continuar
+evaluarC:
+		push AX
+		call obtener_de_mapa
+		pop AX
+		cmp DL, OBJETIVO
+		je sobreponerN
+		mov DL, [elemento_actual]
+		jmp continuar
+evaluarO:
+		push AX
+		call obtener_de_mapa
+		pop AX
+		cmp DL, CAJA
+		je sobreponerN
+		mov DL, [elemento_actual]
+		jmp continuar
+sobreponerN:
+		mov DL, SOBREPUESTO
+continuar:
 		call colocar_en_mapa
 		mov AL, JUGADOR
 		cmp AL, [elemento_actual]
@@ -702,8 +736,8 @@ pintar_objetivo_mapa:
 pintar_sobrepuesto_mapa:
 		push AX
 		call adaptar_coordenada
-		mov SI, offset dim_sprite_caja
-		mov DI, offset data_sprite_caja
+		mov SI, offset dim_sprite_sobre
+		mov DI, offset data_sprite_sobre
 		call pintar_sprite
 		pop AX
 		jmp continuar_h
