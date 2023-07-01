@@ -64,12 +64,12 @@ data_sprite_caja    db   48, 48, 2d, 2d, 48, 48, 2d, 2d
                     db   2d, 2d, 48, 48, 2d, 2d, 48, 48
 dim_sprite_obj      db   08, 08
 data_sprite_obj     db   48, 48, 2d, 2d, 48, 48, 2d, 2d
-                    db   48, 28, 2d, 2d, 48, 48, 28, 2d
-                    db   2d, 2d, 28, 48, 2d, 28, 48, 48
-                    db   2d, 2d, 48, 28, 28, 2d, 48, 48
-                    db   48, 48, 2d, 28, 28, 48, 2d, 2d
-                    db   48, 48, 28, 2d, 48, 28, 2d, 2d
-                    db   2d, 28, 48, 48, 2d, 2d, 28, 48
+                    db   48, 48, 2d, 2d, 48, 48, 2d, 2d
+                    db   2d, 2d, 48, 27, 27, 2d, 48, 48
+                    db   2d, 2d, 27, 27, 27, 27, 48, 48
+                    db   48, 48, 27, 27, 27, 27, 2d, 2d
+                    db   48, 48, 2d, 27, 27, 48, 2d, 2d
+                    db   2d, 2d, 48, 48, 2d, 2d, 48, 48
                     db   2d, 2d, 48, 48, 2d, 2d, 48, 48
 mapa                db   3e8 dup (0)
 iniciar_juego       db   "INICIAR JUEGO$"
@@ -108,6 +108,10 @@ tk_objetivo         db   08,"objetivo"
 tk_coma             db   01,","
 ;;
 numero              db   5 dup (30)
+;; LOCALIZADORES
+hay_objetivo_sig    db   00
+hay_objetivo_act    db   00
+hay_caja            db   00
 .CODE
 .STARTUP
 inicio:
@@ -848,17 +852,41 @@ mover_jugador_arr:
 		push AX
 		call obtener_de_mapa
 		pop AX
-		;; DL <- elemento en mapa
+		;; VALIDAR SI EL DESTINO ES UNA PARED
+		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, PARED
 		je hay_pared_arriba
 		mov [yJugador], AL
-		;;
+		;; VALIDAR SI EL DESTINO ES UN OBJETIVO
+		;; DL <- ELEMENTO EN EL MAPA
+		cmp DL, OBJETIVO
+		je encuentra_objetivo1
+		jmp continuar1
+encuentra_objetivo1:
+		mov [hay_objetivo_sig], 01
+continuar1:
+		;; POSICIONAR AL JUGADOR EN EL MAPA
 		mov DL, JUGADOR
 		push AX
 		call colocar_en_mapa
 		pop AX
+		;; VALIDAR SI EL JUGADOR ESTÁ SOBRE UN OBJETIVO
+		cmp [hay_objetivo_act], 01
+		je devolver_objetivo1
+		;;
+		mov BL, [hay_objetivo_sig]
+		mov [hay_objetivo_act], BL
+		mov [hay_objetivo_sig], 00
 		;;
 		mov DL, SUELO
+		inc AL
+		call colocar_en_mapa
+		ret
+devolver_objetivo1:
+		mov BL, [hay_objetivo_sig]
+		mov [hay_objetivo_act], BL
+		mov [hay_objetivo_sig], 00
+		mov DL, OBJETIVO
 		inc AL
 		call colocar_en_mapa
 		ret
@@ -871,17 +899,41 @@ mover_jugador_aba:
 		push AX
 		call obtener_de_mapa
 		pop AX
-		;; DL <- elemento en mapa
+		;; VALIDAR SI EL DESTINO ES UNA PARED
+		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, PARED
 		je hay_pared_abajo
 		mov [yJugador], AL
-		;;
+		;; VALIDAR SI EL DESTINO ES UN OBJETIVO
+		;; DL <- ELEMENTO EN EL MAPA
+		cmp DL, OBJETIVO
+		je encuentra_objetivo2
+		jmp continuar2
+encuentra_objetivo2:
+		mov[hay_objetivo_sig], 01
+continuar2:
+		;; POSICIONAR AL JUGADOR EN EL MAPA
 		mov DL, JUGADOR
 		push AX
 		call colocar_en_mapa
 		pop AX
+		;; VALIDAR SI EL JUGADOR ESTÁ SOBRE UN OBJETIVO
+		cmp [hay_objetivo_act], 01
+		je devolver_objetivo2
+		;;
+		mov BL, [hay_objetivo_sig]
+		mov [hay_objetivo_act], BL
+		mov [hay_objetivo_sig], 00
 		;;
 		mov DL, SUELO
+		dec AL
+		call colocar_en_mapa
+		ret
+devolver_objetivo2:
+		mov BL, [hay_objetivo_sig]
+		mov [hay_objetivo_act], BL
+		mov [hay_objetivo_sig], 00
+		mov DL, OBJETIVO
 		dec AL
 		call colocar_en_mapa
 		ret
@@ -894,17 +946,41 @@ mover_jugador_izq:
 		push AX
 		call obtener_de_mapa
 		pop AX
-		;; DL <- elemento en mapa
+		;; VALIDAR SI EL DESTINO ES UNA PARED
+		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, PARED
 		je hay_pared_izquierda
 		mov [xJugador], AH
-		;;
+		;; VALIDAR SI EL DESTINO ES UN OBJETIVO
+		;; DL <- ELEMENTO EN EL MAPA
+		cmp DL, OBJETIVO
+		je encuentra_objetivo3
+		jmp continuar3
+encuentra_objetivo3:
+		mov[hay_objetivo_sig], 01
+continuar3:
+		;; POSICIONAR AL JUGADOR EN EL MAPA
 		mov DL, JUGADOR
 		push AX
 		call colocar_en_mapa
 		pop AX
+		;; VALIDAR SI EL JUGADOR ESTÁ SOBRE UN OBJETIVO
+		cmp [hay_objetivo_act], 01
+		je devolver_objetivo3
+		;;
+		mov BL, [hay_objetivo_sig]
+		mov [hay_objetivo_act], BL
+		mov [hay_objetivo_sig], 00
 		;;
 		mov DL, SUELO
+		inc AH
+		call colocar_en_mapa
+		ret
+devolver_objetivo3:
+		mov BL, [hay_objetivo_sig]
+		mov [hay_objetivo_act], BL
+		mov [hay_objetivo_sig], 00
+		mov DL, OBJETIVO
 		inc AH
 		call colocar_en_mapa
 		ret
@@ -917,17 +993,41 @@ mover_jugador_der:
 		push AX
 		call obtener_de_mapa
 		pop AX
-		;; DL <- elemento en mapa
+		;; VALIDAR SI EL DESTINO ES UNA PARED
+		;; DL <- ELEMENTO EN EL MAPA
 		cmp DL, PARED
 		je hay_pared_derecha
 		mov [xJugador], AH
-		;;
+		;; VALIDAR SI EL DESTINO ES UN OBJETIVO
+		;; DL <- ELEMENTO EN EL MAPA
+		cmp DL, OBJETIVO
+		je encuentra_objetivo4
+		jmp continuar4
+encuentra_objetivo4:
+		mov [hay_objetivo_sig], 01
+continuar4:
+		;; POSICIONAR AL JUGADOR EN EL MAPA
 		mov DL, JUGADOR
 		push AX
 		call colocar_en_mapa
 		pop AX
+		;; VALIDAR SI EL JUGADOR ESTÁ SOBRE UN OBJETIVO
+		cmp [hay_objetivo_act], 01
+		je devolver_objetivo4
+		;;
+		mov BL, [hay_objetivo_sig]
+		mov [hay_objetivo_act], BL
+		mov [hay_objetivo_sig], 00
 		;;
 		mov DL, SUELO
+		dec AH
+		call colocar_en_mapa
+		ret
+devolver_objetivo4:
+		mov BL, [hay_objetivo_sig]
+		mov [hay_objetivo_act], BL
+		mov [hay_objetivo_sig], 00
+		mov DL, OBJETIVO
 		dec AH
 		call colocar_en_mapa
 		ret
