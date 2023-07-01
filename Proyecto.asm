@@ -4,6 +4,7 @@ PARED       equ      02
 CAJA        equ      03
 OBJETIVO    equ      04
 SUELO       equ      05
+SOBREPUESTO equ      06
 .MODEL SMALL
 .RADIX 16
 .STACK
@@ -100,12 +101,12 @@ elemento_actual     db   0
 xElemento           db   0
 yElemento           db   0
 ;; TOKENS
-tk_pared            db   05,"pared"
-tk_suelo            db   05,"suelo"
-tk_jugador          db   07,"jugador"
-tk_caja             db   04,"caja"
-tk_objetivo         db   08,"objetivo"
-tk_coma             db   01,","
+TK_pared            db   05,"pared"
+TK_suelo            db   05,"suelo"
+TK_jugador          db   07,"jugador"
+TK_caja             db   04,"caja"
+TK_objetivo         db   08,"objetivo"
+TK_coma             db   01,","
 ;;
 numero              db   5 dup (30)
 ;; LOCALIZADORES
@@ -161,31 +162,31 @@ ciclo_lineas:
 		;; al principio del buffer de la línea está: pared, caja, jugador, suelo, objetivo
 		mov DI, offset linea
 		push DI
-		mov SI, offset tk_pared
+		mov SI, offset TK_pared
 		call strcmp
 		cmp DL, 0ff               ;; cadenas iguales
 		je es_pared
 		pop DI
 		push DI
-		mov SI, offset tk_caja
+		mov SI, offset TK_caja
 		call strcmp
 		cmp DL, 0ff               ;; cadenas iguales
 		je es_caja
 		pop DI
 		push DI
-		mov SI, offset tk_suelo
+		mov SI, offset TK_suelo
 		call strcmp
 		cmp DL, 0ff               ;; cadenas iguales
 		je es_suelo
 		pop DI
 		push DI
-		mov SI, offset tk_objetivo
+		mov SI, offset TK_objetivo
 		call strcmp
 		cmp DL, 0ff               ;; cadenas iguales
 		je es_objetivo
 		pop DI
 		push DI
-		mov SI, offset tk_jugador
+		mov SI, offset TK_jugador
 		call strcmp
 		cmp DL, 0ff               ;; cadenas iguales
 		je es_jugador
@@ -222,7 +223,7 @@ continuar_parseo0:
 		call leer_cadena_numerica
 		push DI
 		mov DI, offset numero
-		call cadenaAnum
+		call toString
 		mov [xElemento], AL
 		pop DI
 		;; ignorar espacios
@@ -237,7 +238,7 @@ continuar_parseo1:
 		call ignorar_espacios
 continuar_parseo2:
 		;; obtener una coma
-		mov SI, offset tk_coma
+		mov SI, offset TK_coma
 		call strcmp
 		cmp DL, 0ff
 		jne ciclo_lineas
@@ -250,7 +251,7 @@ continuar_parseo2:
 		call leer_cadena_numerica
 		push DI
 		mov DI, offset numero
-		call cadenaAnum
+		call toString
 		mov [yElemento], AL
 		pop DI
 		;; ignorar_espacios
@@ -268,6 +269,7 @@ ver_final_de_linea:
 		mov DL, [elemento_actual]
 		mov AH, [xElemento]
 		mov AL, [yElemento]
+		;; EVALUACIÓN DE SOBREPUESTOS
 		call colocar_en_mapa
 		mov AL, JUGADOR
 		cmp AL, [elemento_actual]
@@ -296,7 +298,7 @@ fin_parseo:
 ;;     BX --> y pixel
 ;;     CL --> color
 ;; SALIDA: pintar pixel
-;; AX + 320*BX
+;;     AX + 320*BX
 pintar_pixel:
 		push AX
 		push BX
@@ -1156,20 +1158,20 @@ ciclo_copiar_num:
 		pop DI
 		ret
 
-;; cadenaAnum
+;; toString
 ;; ENTRADA:
 ;;    DI -> dirección a una cadena numérica
 ;; SALIDA:
 ;;    AX -> número convertido
 ;;;;
-cadenaAnum:
+toString:
 		mov AX, 0000    ; inicializar la salida
 		mov CX, 0005    ; inicializar contador
 		;;
 seguir_convirtiendo:
 		mov BL, [DI]
 		cmp BL, 00
-		je retorno_cadenaAnum
+		je retorno_toString
 		sub BL, 30      ; BL es el valor numérico del caracter
 		mov DX, 000a
 		mul DX          ; AX * DX -> DX:AX
@@ -1177,7 +1179,7 @@ seguir_convirtiendo:
 		add AX, BX 
 		inc DI          ; puntero en la cadena
 		loop seguir_convirtiendo
-retorno_cadenaAnum:
+retorno_toString:
 		ret
 
 fin:
