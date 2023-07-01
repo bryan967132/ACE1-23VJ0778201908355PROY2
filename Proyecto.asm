@@ -19,14 +19,14 @@ data_sprite_jug     db   48, 48, 00, 00, 00, 00, 2d, 2d
                     db   2d, 00, 41, 41, 41, 41, 00, 48
                     db   2d, 2d, 00, 00, 00, 00, 48, 48
 dim_sprite_flcha    db   08, 08
-data_sprite_flcha   db   00, 00, 00, 00, 03, 00, 00, 00
-                    db   00, 00, 00, 00, 03, 03, 00, 00
-                    db   03, 03, 03, 03, 03, 03, 03, 00
-                    db   03, 03, 03, 03, 03, 03, 03, 03
-                    db   03, 03, 03, 03, 03, 03, 03, 03
-                    db   03, 03, 03, 03, 03, 03, 03, 00
-                    db   00, 00, 00, 00, 03, 03, 00, 00
-                    db   00, 00, 00, 00, 03, 00, 00, 00
+data_sprite_flcha   db   00, 00, 00, 00, 32, 00, 00, 00
+                    db   00, 00, 00, 00, 02, 32, 00, 00
+                    db   32, 32, 32, 32, 02, 02, 32, 00
+                    db   02, 02, 02, 02, 02, 02, 02, 32
+                    db   02, 02, 02, 02, 02, 02, 02, 78
+                    db   78, 78, 78, 78, 02, 02, 78, 00
+                    db   00, 00, 00, 00, 02, 78, 00, 00
+                    db   00, 00, 00, 00, 78, 00, 00, 00
 dim_sprite_vacio    db   08, 08
 data_sprite_vacio   db   00, 00, 00, 00, 00, 00, 00, 00
                     db   00, 00, 00, 00, 00, 00, 00, 00
@@ -104,11 +104,17 @@ control_izquierda   db   4b
 control_derecha     db   4d
 ;; NIVELES
 nivel_x             db   "NIV.00",00
+nivel1              db   "NIV.00",00
+nivel2              db   "NIV.01",00
+nivel3              db   "NIV.10",00
 handle_nivel        dw   0000
 linea               db   100 dup (0)
 elemento_actual     db   0
 xElemento           db   0
 yElemento           db   0
+numeroNivel         db   01
+cant_objetivos      db   00
+cant_sobrepuestos   db   00
 ;; TOKENS
 TK_pared            db   05,"pared"
 TK_suelo            db   05,"suelo"
@@ -130,33 +136,74 @@ inicio:
 		mov AL, 13
 		int 10
 		;;;;;;;;;;;;;;;;
+menu:
+		mov [numeroNivel], 01
 		call menu_principal
 		mov AL, [opcion]
 		;; > INICIAR JUEGO
 		cmp AL, 0
-		je ciclo_juego
+		je modo_juego
 		;; > CARGAR NIVEL
 		cmp AL, 1
-		je cargar_un_nivel
+		je modo_cargar_nivel
 		;; > CONFIGURACION
 		;; > PUNTAJES ALTOS
 		;; > SALIR
 		cmp AL, 4
 		je fin
+		jmp menu
 		;;;;;;;;;;;;;;;;
+
+modo_juego:
+		cmp [numeroNivel], 01
+		je cargar_nivel1
+		cmp [numeroNivel], 02
+		je cargar_nivel2
+		cmp [numeroNivel], 03
+		je cargar_nivel3
+		jmp menu
+
+cargar_nivel1:
+		mov DX, offset nivel1
+		jmp cargar_un_nivel
+cargar_nivel2:
+		mov DX, offset nivel2
+		jmp cargar_un_nivel
+cargar_nivel3:
+		mov DX, offset nivel3
+		jmp cargar_un_nivel
+
+modo_cargar_nivel:
+		mov [numeroNivel], 00
+		mov DX, offset nivel_x
+		jmp cargar_un_nivel
+
 ciclo_juego:
+		mov AL, [cant_sobrepuestos]
+		cmp [cant_objetivos], AL
+		je avanzar_nivel
 		call pintar_mapa
 		call entrada_juego
 		jmp ciclo_juego
+avanzar_nivel:
+		mov [cant_sobrepuestos], 00
+		mov [cant_objetivos], 00
+		cmp [numeroNivel], 00
+		je menu
+		inc [numeroNivel]
+		jmp modo_juego
 		;;;;;;;;;;;;;;;;
 
 cargar_un_nivel:
 		mov AL, 00
-		mov DX, offset nivel_x
 		mov AH, 3d
 		int 21
 		jc inicio
 		mov [handle_nivel], AX
+		mov DI, offset mapa
+		mov CX, 3e8
+		mov AL, 00
+		call memset
 		;;
 ciclo_lineas:
 		mov BX, [handle_nivel]
@@ -216,6 +263,7 @@ es_suelo:
 es_objetivo:
 		mov AL, OBJETIVO
 		mov [elemento_actual], AL
+		inc [cant_objetivos]
 		jmp continuar_parseo0
 es_jugador:
 		mov AL, JUGADOR
@@ -302,6 +350,7 @@ evaluarO:
 		jmp continuar
 sobreponerN:
 		mov DL, SOBREPUESTO
+		inc [cant_sobrepuestos]
 continuar:
 		call colocar_en_mapa
 		mov AL, JUGADOR
@@ -814,6 +863,7 @@ encuentra_caja1:
 		je sobreponer1
 		jmp mover_caja1
 sobreponer1:
+		inc [cant_sobrepuestos]
 		inc AL
 		push AX
 		call obtener_de_mapa
@@ -827,6 +877,7 @@ sobreponer1:
 		inc AL
 		jmp continuar1
 mueve_sobrepuesto1:
+		dec [cant_sobrepuestos]
 		mov [hay_objetivo_sig], 01
 		jmp encuentra_caja1
 mover_caja1:
@@ -923,6 +974,7 @@ encuentra_caja2:
 		je sobreponer2
 		jmp mover_caja2
 sobreponer2:
+		inc [cant_sobrepuestos]
 		dec AL
 		push AX
 		call obtener_de_mapa
@@ -936,6 +988,7 @@ sobreponer2:
 		dec AL
 		jmp continuar2
 mueve_sobrepuesto2:
+		dec [cant_sobrepuestos]
 		mov [hay_objetivo_sig], 01
 		jmp encuentra_caja2
 mover_caja2:
@@ -1032,6 +1085,7 @@ encuentra_caja3:
 		je sobreponer3
 		jmp mover_caja3
 sobreponer3:
+		inc [cant_sobrepuestos]
 		inc AH
 		push AX
 		call obtener_de_mapa
@@ -1045,6 +1099,7 @@ sobreponer3:
 		inc AH
 		jmp continuar3
 mueve_sobrepuesto3:
+		dec [cant_sobrepuestos]
 		mov [hay_objetivo_sig], 01
 		jmp encuentra_caja3
 mover_caja3:
@@ -1141,6 +1196,7 @@ encuentra_caja4:
 		je sobreponer4
 		jmp mover_caja4
 sobreponer4:
+		inc [cant_sobrepuestos]
 		dec AH
 		push AX
 		call obtener_de_mapa
@@ -1154,6 +1210,7 @@ sobreponer4:
 		dec AH
 		jmp continuar4
 mueve_sobrepuesto4:
+		dec [cant_sobrepuestos]
 		mov [hay_objetivo_sig], 01
 		jmp encuentra_caja4
 mover_caja4:
