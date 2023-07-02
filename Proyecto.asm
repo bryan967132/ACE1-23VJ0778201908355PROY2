@@ -103,10 +103,10 @@ control_abajo       db   50
 control_izquierda   db   4b
 control_derecha     db   4d
 ;; NIVELES
-nivel_x             db   "NIV.00",00
-nivel1              db   "NIV.00",00
-nivel2              db   "NIV.01",00
-nivel3              db   "NIV.10",00
+nivel_x             db   20 dup (0), 00
+nivel1              db   "NIV.00", 00
+nivel2              db   "NIV.01", 00
+nivel3              db   "NIV.10", 00
 handle_nivel        dw   0000
 linea               db   100 dup (0)
 elemento_actual     db   0
@@ -128,6 +128,12 @@ numero              db   5 dup (30)
 hay_objetivo_sig    db   00
 hay_objetivo_act    db   00
 hay_caja            db   00
+;; BUFFER
+buffer_entrada      db   21, 00
+                    db   21 dup (0)
+;; CARGA DE NIVEL
+nombre_archivo_nvl  db   "Nombre Del Archivo$"
+de_nivel            db   " De Nivel: $"
 .CODE
 .STARTUP
 inicio:
@@ -174,6 +180,41 @@ cargar_nivel3:
 		jmp cargar_un_nivel
 
 modo_cargar_nivel:
+		;;
+		call clear_pantalla
+		;; ENTRADA
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 0a        ; COLUMNA
+		mov DH, 05        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset nombre_archivo_nvl
+		mov AH, 09
+		int 21
+		pop DX
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 0a        ; COLUMNA
+		mov DH, 07        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset de_nivel
+		mov AH, 09
+		int 21
+		pop DX
+		;; LEER ENTRADA
+		mov DX, offset buffer_entrada
+		mov AH, 0a
+		int 21
+		;; COPIAR BUFFER A NIVEL_X
+		mov SI, offset nivel_x
+		mov DI, offset buffer_entrada
+		call memcpy
 		mov [numeroNivel], 00
 		mov DX, offset nivel_x
 		jmp cargar_un_nivel
@@ -1417,6 +1458,24 @@ seguir_convirtiendo:
 		inc DI          ; puntero en la cadena
 		loop seguir_convirtiendo
 retorno_toString:
+		ret
+
+;; memcpy
+;; ENTRADAS:
+;;    SI -> dirección de a dónde se va a copiar
+;;    DI -> dirección de lo que se va a copiar
+;;;;
+memcpy:
+		inc DI
+		mov CH, 00
+		mov CL, [DI]
+		inc DI                   ; CONTENIDO EN EL BUFFER
+copiarCampoAEstructura:
+		mov AL, [DI]
+		mov [SI], AL
+		inc SI
+		inc DI
+		loop copiarCampoAEstructura
 		ret
 
 fin:
