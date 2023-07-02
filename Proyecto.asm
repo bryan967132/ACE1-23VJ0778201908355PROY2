@@ -105,7 +105,7 @@ control_derecha     db   4d
 ;; NIVELES
 nivel_x             db   20 dup (0), 00
 nivel1              db   "NIV.00", 00
-nivel2              db   "NIV.01", 00
+nivel2              db   "NIV.00", 00
 nivel3              db   "NIV.10", 00
 handle_nivel        dw   0000
 linea               db   100 dup (0)
@@ -185,7 +185,7 @@ modo_cargar_nivel:
 		;; ENTRADA
 		;; <<-- POSICIONAR EL CURSOR
 		mov DL, 0a        ; COLUMNA
-		mov DH, 05        ; FILA
+		mov DH, 07        ; FILA
 		mov BH, 00        ; NÚMERO DE PÁGINA
 		mov AH, 02
 		int 10
@@ -195,9 +195,10 @@ modo_cargar_nivel:
 		mov AH, 09
 		int 21
 		pop DX
+leer_entrada_buffer:
 		;; <<-- POSICIONAR EL CURSOR
 		mov DL, 0a        ; COLUMNA
-		mov DH, 07        ; FILA
+		mov DH, 09        ; FILA
 		mov BH, 00        ; NÚMERO DE PÁGINA
 		mov AH, 02
 		int 10
@@ -211,6 +212,10 @@ modo_cargar_nivel:
 		mov DX, offset buffer_entrada
 		mov AH, 0a
 		int 21
+		mov DI, offset buffer_entrada
+		call lengthBuffer
+		cmp AL, 00
+		je leer_entrada_buffer
 		;; COPIAR BUFFER A NIVEL_X
 		mov SI, offset nivel_x
 		mov DI, offset buffer_entrada
@@ -220,12 +225,15 @@ modo_cargar_nivel:
 		jmp cargar_un_nivel
 
 ciclo_juego:
+		call pintar_mapa
+ciclo_juego1:
 		mov AL, [cant_sobrepuestos]
 		cmp [cant_objetivos], AL
 		je avanzar_nivel
-		call pintar_mapa
+		call pintar_jugador_perimetro
 		call entrada_juego
-		jmp ciclo_juego
+		jmp ciclo_juego1
+
 avanzar_nivel:
 		mov [cant_sobrepuestos], 00
 		mov [cant_objetivos], 00
@@ -838,6 +846,105 @@ continuar_v:
 		inc AL
 		jmp ciclo_v
 fin_pintar_mapa:
+		ret
+
+;; pintar_jugador_horizontal - pinta los elementos del mapa
+;; ENTRADA:
+;; SALIDA:
+pintar_jugador_perimetro:
+		mov AL, [yJugador]   ;; fila
+		mov AH, [xJugador]   ;; columna
+		;; PINTAR JUGADOR
+		push AX
+		call adaptar_coordenada
+		mov SI, offset dim_sprite_jug
+		mov DI, offset data_sprite_jug
+		call pintar_sprite
+		pop AX
+		;; PINTAR PERÍMETRO JUGADOR
+		;; IZQUIERDA
+		dec AH
+		push AX
+		call obtener_de_mapa
+		pop AX
+		call pintar_perimetro
+		;; PINTAR PERÍMETRO JUGADOR
+		;; DERECHA
+		inc AH
+		inc AH
+		push AX
+		call obtener_de_mapa
+		pop AX
+		call pintar_perimetro
+		;; PINTAR PERÍMETRO JUGADOR
+		;; ARRIBA
+		dec AH
+		dec AL
+		push AX
+		call obtener_de_mapa
+		pop AX
+		call pintar_perimetro
+		;; PINTAR PERÍMETRO JUGADOR
+		;; ABAJO
+		inc AL
+		inc AL
+		push AX
+		call obtener_de_mapa
+		pop AX
+		call pintar_perimetro
+		ret
+pintar_perimetro:
+		cmp DL, PARED
+		je pintar_pared_mapa_p
+		cmp DL, CAJA
+		je pintar_caja_mapa_p
+		cmp DL, OBJETIVO
+		je pintar_objetivo_mapa_p
+		cmp DL, SOBREPUESTO
+		je pintar_sobrepuesto_mapa_p
+		cmp DL, SUELO
+		je pintar_suelo_mapa_p
+pintar_suelo_mapa_p:
+		push AX
+		call adaptar_coordenada
+		mov SI, offset dim_sprite_suelo
+		mov DI, offset data_sprite_suelo
+		call pintar_sprite
+		pop AX
+		jmp terminar_perimetro
+pintar_pared_mapa_p:
+		push AX
+		call adaptar_coordenada
+		mov SI, offset dim_sprite_pared
+		mov DI, offset data_sprite_pared
+		call pintar_sprite
+		pop AX
+		jmp terminar_perimetro
+pintar_caja_mapa_p:
+		push AX
+		call adaptar_coordenada
+		mov SI, offset dim_sprite_caja
+		mov DI, offset data_sprite_caja
+		call pintar_sprite
+		pop AX
+		jmp terminar_perimetro
+pintar_objetivo_mapa_p:
+		push AX
+		call adaptar_coordenada
+		mov SI, offset dim_sprite_obj
+		mov DI, offset data_sprite_obj
+		call pintar_sprite
+		pop AX
+		jmp terminar_perimetro
+pintar_sobrepuesto_mapa_p:
+		push AX
+		call adaptar_coordenada
+		mov SI, offset dim_sprite_sobre
+		mov DI, offset data_sprite_sobre
+		call pintar_sprite
+		pop AX
+		jmp terminar_perimetro
+terminar_perimetro:
 		ret
 
 ;; entrada_juego - manejo de las entradas del juego
@@ -1476,6 +1583,15 @@ copiarCampoAEstructura:
 		inc SI
 		inc DI
 		loop copiarCampoAEstructura
+		ret
+
+;; lengthBuffer
+;; ENTRADAS
+;;    DI -> dirección del buffer
+;;;;
+lengthBuffer:
+		inc DI
+		mov AL, [DI]
 		ret
 
 fin:
