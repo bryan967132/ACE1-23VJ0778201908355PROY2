@@ -105,7 +105,7 @@ control_derecha     db   4d
 ;; NIVELES
 nivel_x             db   20 dup (0), 00
 nivel1              db   "NIV.00", 00
-nivel2              db   "NIV.00", 00
+nivel2              db   "NIV.01", 00
 nivel3              db   "NIV.10", 00
 handle_nivel        dw   0000
 linea               db   100 dup (0)
@@ -115,6 +115,7 @@ yElemento           db   0
 numeroNivel         db   01
 cant_objetivos      db   00
 cant_sobrepuestos   db   00
+cant_sobre_aux      db   00
 ;; TOKENS
 TK_pared            db   05,"pared"
 TK_suelo            db   05,"suelo"
@@ -400,6 +401,7 @@ evaluarO:
 sobreponerN:
 		mov DL, SOBREPUESTO
 		inc [cant_sobrepuestos]
+		inc [cant_sobre_aux]
 continuar:
 		call colocar_en_mapa
 		mov AL, JUGADOR
@@ -1058,6 +1060,8 @@ continuar1:
 		mov DL, SUELO
 		inc AL
 		call colocar_en_mapa
+		mov AL, [cant_sobrepuestos]
+		mov [cant_sobre_aux], AL
 		ret
 devolver_objetivo1:
 		mov BL, [hay_objetivo_sig]
@@ -1066,15 +1070,21 @@ devolver_objetivo1:
 		mov DL, OBJETIVO
 		inc AL
 		call colocar_en_mapa
+		mov AL, [cant_sobrepuestos]
+		mov [cant_sobre_aux], AL
 		ret
 hay_pared_arriba:
 		mov [hay_objetivo_sig], 00
+		mov AL, [cant_sobre_aux]
+		mov [cant_sobrepuestos], AL
 		ret
 no_pasa_arriba:
 		mov [hay_objetivo_sig], 00
 		inc AL
 		inc AL
 		mov [yJugador], AL
+		mov AL, [cant_sobre_aux]
+		mov [cant_sobrepuestos], AL
 		ret
 mover_jugador_aba:
 		mov AH, [xJugador]
@@ -1169,6 +1179,8 @@ continuar2:
 		mov DL, SUELO
 		dec AL
 		call colocar_en_mapa
+		mov AL, [cant_sobrepuestos]
+		mov [cant_sobre_aux], AL
 		ret
 devolver_objetivo2:
 		mov BL, [hay_objetivo_sig]
@@ -1177,15 +1189,21 @@ devolver_objetivo2:
 		mov DL, OBJETIVO
 		dec AL
 		call colocar_en_mapa
+		mov AL, [cant_sobrepuestos]
+		mov [cant_sobre_aux], AL
 		ret
 hay_pared_abajo:
 		mov [hay_objetivo_sig], 00
+		mov AL, [cant_sobre_aux]
+		mov [cant_sobrepuestos], AL
 		ret
 no_pasa_abajo:
 		mov [hay_objetivo_sig], 00
 		dec AL
 		dec AL
 		mov [yJugador], AL
+		mov AL, [cant_sobre_aux]
+		mov [cant_sobrepuestos], AL
 		ret
 mover_jugador_izq:
 		mov AH, [xJugador]
@@ -1280,6 +1298,8 @@ continuar3:
 		mov DL, SUELO
 		inc AH
 		call colocar_en_mapa
+		mov AL, [cant_sobrepuestos]
+		mov [cant_sobre_aux], AL
 		ret
 devolver_objetivo3:
 		mov BL, [hay_objetivo_sig]
@@ -1288,15 +1308,21 @@ devolver_objetivo3:
 		mov DL, OBJETIVO
 		inc AH
 		call colocar_en_mapa
+		mov AL, [cant_sobrepuestos]
+		mov [cant_sobre_aux], AL
 		ret
 hay_pared_izquierda:
 		mov [hay_objetivo_sig], 00
+		mov AL, [cant_sobre_aux]
+		mov [cant_sobrepuestos], AL
 		ret
 no_pasa_izquierda:
 		mov [hay_objetivo_sig], 00
 		inc AH
 		inc AH
 		mov [xJugador], AH
+		mov AL, [cant_sobre_aux]
+		mov [cant_sobrepuestos], AL
 		ret
 mover_jugador_der:
 		mov AH, [xJugador]
@@ -1391,6 +1417,8 @@ continuar4:
 		mov DL, SUELO
 		dec AH
 		call colocar_en_mapa
+		mov AL, [cant_sobrepuestos]
+		mov [cant_sobre_aux], AL
 		ret
 devolver_objetivo4:
 		mov BL, [hay_objetivo_sig]
@@ -1399,15 +1427,21 @@ devolver_objetivo4:
 		mov DL, OBJETIVO
 		dec AH
 		call colocar_en_mapa
+		mov AL, [cant_sobrepuestos]
+		mov [cant_sobre_aux], AL
 		ret
 hay_pared_derecha:
 		mov [hay_objetivo_sig], 00
+		mov AL, [cant_sobre_aux]
+		mov [cant_sobrepuestos], AL
 		ret
 no_pasa_derecha:
 		mov [hay_objetivo_sig], 00
 		dec AH
 		dec AH
 		mov [xJugador], AH
+		mov AL, [cant_sobre_aux]
+		mov [cant_sobrepuestos], AL
 		ret
 fin_entrada_juego:
 		ret
