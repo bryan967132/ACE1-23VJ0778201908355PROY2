@@ -237,6 +237,7 @@ ciclo_juego1:
 
 avanzar_nivel:
 		mov [cant_sobrepuestos], 00
+		mov [cant_sobre_aux], 00
 		mov [cant_objetivos], 00
 		cmp [numeroNivel], 00
 		je menu
