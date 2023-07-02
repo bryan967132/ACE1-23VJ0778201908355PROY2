@@ -32,7 +32,7 @@ Existen diferentes objetos en el entorno del juego.
 |||||||
 |:-|:-|:-|:-|:-|:-|
 | 1.| Pared | 2.| Suelo | 3.| Jugador |
-| 4.| Caja Sobre Objetivo | 5.| Caja | 6.| Objetivo |
+| 4.| Caja | 5.| Caja Sobre Objetivo | 6.| Objetivo |
 | 7.| Flecha Menú |
 
 ![Sprites](./Images/Sprites.png "Sprites")  
