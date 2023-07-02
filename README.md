@@ -22,8 +22,11 @@ Esta ventana es en donde se realizan las partidas. Existen 3 niveles. Aunque pue
 A medida que se desarrolla el juego las cajas cambian de color según vayan ocupando posiciones de objetivos.  
 ![Juego](./Images/Nivel2.png "Juego")  
 ![Juego](./Images/Nivel2F.png "Juego")  
-### Controles del Juego
+### Controles Del Juego
 Inicialmentes puede controlarse el personaje jugable con las flechas del teclado. Esta configuración puede modificarse.  
+### Menú De Pausa
+En esta opción se podrá retornar nuevamenta al juego para continuar la última partida o finalizarla e ir al menú principal.
+![Menú Pausa](./Images/Pausa.png "Menú Pausa")  
 ### Cargar Nivel
 En esta opción se podrán cargar nuevos niveles que no estén entre los predeterminados. Se cargará ingresando el nombre del archivo con su extensión.
 ![Cargar Nivel](./Images/CargarNivel.png "Cargar Nivel")  

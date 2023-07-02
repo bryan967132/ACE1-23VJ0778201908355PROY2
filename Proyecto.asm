@@ -81,13 +81,15 @@ data_sprite_obj     db   48, 48, 2d, 2d, 48, 48, 2d, 2d
                     db   48, 48, 2d, 27, 27, 48, 2d, 2d
                     db   2d, 2d, 48, 48, 2d, 2d, 48, 48
                     db   2d, 2d, 48, 48, 2d, 2d, 48, 48
-mapa                db   3e8 dup (0)
+mapa                db   398 dup (0)
 iniciar_juego       db   "INICIAR JUEGO$"
 cargar_nivel        db   "CARGAR NIVEL$"
 configuracion       db   "CONFIGURACION$"
 puntajes            db   "PUNTAJES ALTOS$"
 salir               db   "SALIR$"
 iniciales           db   "DHBTP - 201908355$"
+continuar_partida   db   "CONTINUAR PARTIDA$"
+salir_al_menu       db   "SALIR AL MENU$"
 ;; JUEGO
 xJugador            db   0
 yJugador            db   0
@@ -176,18 +178,18 @@ pantalla_inicial:
 		call imprimirIniciales
 		;;;;;;;;;;;IMPRESIÓN TIEMPO;;;;;;;;;;;;;
 		call imprimirTiempo
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
-		call delay
+		;call delay
+		;call delay
+		;call delay
+		;call delay
+		;call delay
+		;call delay
+		;call delay
+		;call delay
+		;call delay
+		;call delay
+		;call delay
+		;call delay
 
 menu:
 		mov [numeroNivel], 01
@@ -319,7 +321,7 @@ cargar_un_nivel:
 continuar_carga_nivel:
 		mov [handle_nivel], AX
 		mov DI, offset mapa
-		mov CX, 3e8
+		mov CX, 398
 		mov AL, 00
 		call memset
 		;;
@@ -621,18 +623,32 @@ clear_h:
 ;;    - [opcion] -> código numérico de la opción elegida
 menu_principal:
 		call clear_pantalla
-		mov AL, 0
+		;; IMPRIMIR OPCIONES ;;
+		;;;; SOKOBAN
+		mov DL, 10
+		mov DH, 05
+		mov BH, 00
+		mov AH, 02
+		int 10
+		;; <<-- posicionar el cursor
+		push DX
+		mov DX, offset sokoban
+		mov AH, 09
+		int 21
+		pop DX
+		;;
+		mov AL, 00
 		mov [opcion], AL      ;; reinicio de la variable de salida
-		mov AL, 5
+		mov AL, 05
 		mov [maximo], AL
-		mov AX, 50
-		mov BX, 28
+		mov AX, 5a
+		mov BX, 48
 		mov [xFlecha], AX
 		mov [yFlecha], BX
 		;; IMPRIMIR OPCIONES ;;
 		;;;; INICIAR JUEGO
-		mov DL, 0c
-		mov DH, 05
+		mov DL, 0d
+		mov DH, 09
 		mov BH, 00
 		mov AH, 02
 		int 10
@@ -731,8 +747,8 @@ mover_flecha_menu_principal:
 		mov SI, offset dim_sprite_vacio
 		mov DI, offset data_sprite_vacio
 		call pintar_sprite
-		mov AX, 50
-		mov BX, 28
+		mov AX, 5a
+		mov BX, 48
 		mov CL, [opcion]
 ciclo_ubicar_flecha_menu_principal:
 		cmp CL, 0
@@ -1027,6 +1043,105 @@ pintar_sobrepuesto_mapa_p:
 terminar_perimetro:
 		ret
 
+ciclo_pausa:
+		call menu_pausa
+		cmp [opcion], 0
+		je ciclo_juego
+		jmp menu
+
+menu_pausa:
+		call clear_pantalla
+		;; IMPRIMIR OPCIONES ;;
+		;;;; SOKOBAN
+		mov DL, 10
+		mov DH, 05
+		mov BH, 00
+		mov AH, 02
+		int 10
+		;; <<-- posicionar el cursor
+		push DX
+		mov DX, offset sokoban
+		mov AH, 09
+		int 21
+		pop DX
+		;;
+		mov AL, 00
+		mov [opcion], AL      ;; reinicio de la variable de salida
+		mov AX, 52
+		mov BX, 48
+		mov [xFlecha], AX
+		mov [yFlecha], BX
+		;; IMPRIMIR OPCIONES ;;
+		;;;; INICIAR JUEGO
+		mov DL, 0c
+		mov DH, 09
+		mov BH, 00
+		mov AH, 02
+		int 10
+		;; <<-- posicionar el cursor
+		push DX
+		mov DX, offset continuar_partida
+		mov AH, 09
+		int 21
+		pop DX
+		;;
+		;;;; CARGAR NIVEL
+		add DH, 02
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset salir_al_menu
+		mov AH, 09
+		int 21
+		pop DX
+		;;;;
+		call pintar_flecha
+		;;;;
+		;; LEER TECLA
+		;;;;
+entrada_menu_pausa:
+		mov AH, 00
+		int 16
+		cmp AH, 48
+		je restar_opcion_menu_pausa
+		cmp AH, 50
+		je sumar_opcion_menu_pausa
+		cmp AH, 3b  ;; le doy F1
+		je fin_menu_pausa
+		jmp entrada_menu_pausa
+restar_opcion_menu_pausa:
+		mov AL, 00
+		mov [opcion], AL
+		jmp mover_flecha_menu_pausa
+sumar_opcion_menu_pausa:
+		mov AL, 01
+		mov [opcion], AL
+		jmp mover_flecha_menu_pausa
+mover_flecha_menu_pausa:
+		mov AX, [xFlecha]
+		mov BX, [yFlecha]
+		mov SI, offset dim_sprite_vacio
+		mov DI, offset data_sprite_vacio
+		call pintar_sprite
+		mov AX, 52
+		mov BX, 48
+		mov CL, [opcion]
+ciclo_ubicar_flecha_menu_pausa:
+		cmp CL, 0
+		je pintar_flecha_menu_pausa
+		dec CL
+		add BX, 10
+		jmp ciclo_ubicar_flecha_menu_pausa
+pintar_flecha_menu_pausa:
+		mov [xFlecha], AX
+		mov [yFlecha], BX
+		call pintar_flecha
+		jmp entrada_menu_pausa
+		;;
+fin_menu_pausa:
+		ret
+
 ;; entrada_juego - manejo de las entradas del juego
 entrada_juego:
 		mov AH, 01
@@ -1035,6 +1150,8 @@ entrada_juego:
 		mov AH, 00
 		int 16
 		;; AH <- scan code
+		cmp AH, 3c
+		je ciclo_pausa
 		cmp AH, [control_arriba]
 		je mover_jugador_arr
 		cmp AH, [control_abajo]
