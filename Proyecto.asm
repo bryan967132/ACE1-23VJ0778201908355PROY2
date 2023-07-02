@@ -146,7 +146,7 @@ tiempoDS            db   01 dup(30), "$"
 dospuntos           db   ":$"
 tiempoUM            db   01 dup(30), "$"
 tiempoDM            db   01 dup(30), "$"
-retardoTiempo       db   00
+retardoTiempo       dw   00
 .CODE
 .STARTUP
 inicio:
@@ -228,6 +228,8 @@ cargar_nivel3:
 		jmp cargar_un_nivel
 
 modo_cargar_nivel:
+		call limpiarTiempo
+		call limpiarMovs
 		;;
 		call clear_pantalla
 		;; ENTRADA
@@ -275,12 +277,11 @@ leer_entrada_buffer:
 ciclo_juego:
 		call pintar_mapa
 		call imprimirIniciales
+		call imprimirMovimientos
 ciclo_juego1:
 		mov AL, [cant_sobrepuestos]
 		cmp [cant_objetivos], AL
 		je avanzar_nivel
-		call pintar_jugador_perimetro
-		call imprimirMovimientos
 		call imprimirTiempo
 		call incrementarTiempo
 		call entrada_juego
@@ -906,7 +907,7 @@ fin_pintar_mapa:
 ;; pintar_jugador_horizontal - pinta los elementos del mapa
 ;; ENTRADA:
 ;; SALIDA:
-pintar_jugador_perimetro:
+pintar_jugador_perimetro_x:
 		mov AL, [yJugador]   ;; fila
 		mov AH, [xJugador]   ;; columna
 		;; PINTAR JUGADOR
@@ -931,9 +932,19 @@ pintar_jugador_perimetro:
 		call obtener_de_mapa
 		pop AX
 		call pintar_perimetro
+		ret
+pintar_jugador_perimetro_y:
+		mov AL, [yJugador]   ;; fila
+		mov AH, [xJugador]   ;; columna
+		;; PINTAR JUGADOR
+		push AX
+		call adaptar_coordenada
+		mov SI, offset dim_sprite_jug
+		mov DI, offset data_sprite_jug
+		call pintar_sprite
+		pop AX
 		;; PINTAR PERÍMETRO JUGADOR
 		;; ARRIBA
-		dec AH
 		dec AL
 		push AX
 		call obtener_de_mapa
@@ -1116,6 +1127,8 @@ continuar1:
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
 		call incrementarMovs
+		call imprimirMovimientos
+		call pintar_jugador_perimetro_y
 		ret
 devolver_objetivo1:
 		mov BL, [hay_objetivo_sig]
@@ -1127,6 +1140,8 @@ devolver_objetivo1:
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
 		call incrementarMovs
+		call imprimirMovimientos
+		call pintar_jugador_perimetro_y
 		ret
 hay_pared_arriba:
 		mov [hay_objetivo_sig], 00
@@ -1237,6 +1252,8 @@ continuar2:
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
 		call incrementarMovs
+		call imprimirMovimientos
+		call pintar_jugador_perimetro_y
 		ret
 devolver_objetivo2:
 		mov BL, [hay_objetivo_sig]
@@ -1248,6 +1265,8 @@ devolver_objetivo2:
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
 		call incrementarMovs
+		call imprimirMovimientos
+		call pintar_jugador_perimetro_y
 		ret
 hay_pared_abajo:
 		mov [hay_objetivo_sig], 00
@@ -1358,6 +1377,8 @@ continuar3:
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
 		call incrementarMovs
+		call imprimirMovimientos
+		call pintar_jugador_perimetro_x
 		ret
 devolver_objetivo3:
 		mov BL, [hay_objetivo_sig]
@@ -1369,6 +1390,8 @@ devolver_objetivo3:
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
 		call incrementarMovs
+		call imprimirMovimientos
+		call pintar_jugador_perimetro_x
 		ret
 hay_pared_izquierda:
 		mov [hay_objetivo_sig], 00
@@ -1479,6 +1502,8 @@ continuar4:
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
 		call incrementarMovs
+		call imprimirMovimientos
+		call pintar_jugador_perimetro_x
 		ret
 devolver_objetivo4:
 		mov BL, [hay_objetivo_sig]
@@ -1490,6 +1515,8 @@ devolver_objetivo4:
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
 		call incrementarMovs
+		call imprimirMovimientos
+		call pintar_jugador_perimetro_x
 		ret
 hay_pared_derecha:
 		mov [hay_objetivo_sig], 00
@@ -1854,7 +1881,7 @@ limpiarTiempo:
 		ret
 
 incrementarTiempo:
-		cmp [retardoTiempo], 0ff
+		cmp [retardoTiempo], 4000
 		je incrementarTiempo1
 		ret
 incrementarTiempo1:
