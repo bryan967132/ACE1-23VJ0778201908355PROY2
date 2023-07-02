@@ -16,7 +16,7 @@ Muestra el nombre del juego y las iniciales del desarrollador.
 Muestra las distintas opciones que tiene el videojuego.  
 ![Menú Principal](./Images/MenuPrincipal.png "Menú Principal")  
 ### Iniciar Juego
-Esta ventana es en donde se realizan las partidas. Existen 3 niveles. Aunque pueden cargarse más en la opción Cargar Nivel.  
+Esta ventana es en donde se realizan las partidas. Existen 3 niveles. Aunque pueden cargarse más en la opción Cargar Nivel. En cada partida se lleva hace un conteo de tiempo y de movimientos realizados hasta el momento.  
 ![Juego](./Images/Nivel1.png "Juego")
 ![Juego](./Images/Nivel1F.png "Juego")  
 A medida que se desarrolla el juego las cajas cambian de color según vayan ocupando posiciones de objetivos.  
