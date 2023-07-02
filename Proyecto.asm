@@ -89,7 +89,17 @@ puntajes            db   "PUNTAJES ALTOS$"
 salir               db   "SALIR$"
 iniciales           db   "DHBTP - 201908355$"
 continuar_partida   db   "CONTINUAR PARTIDA$"
+controles_actuales  db   "CONTROLES$"
+ctrl_arriba         db   "ARRIBA:    $"
+ctrl_abajo          db   "ABAJO:     $"
+ctrl_izq            db   "IZQUIERDA: $"
+ctrl_der            db   "DERECHA:   $"
+cambiar_controles   db   "CAMBIAR CONTROLES$"
 salir_al_menu       db   "SALIR AL MENU$"
+char_arriba         db   "FLECHA ABAJO      ", "$"
+char_abajo          db   "FLECHA ARRIBA     ", "$"
+char_izq            db   "FLECHA IZQUIERDA  ", "$"
+char_der            db   "FLECHA DERECHA    ", "$"
 ;; JUEGO
 xJugador            db   0
 yJugador            db   0
@@ -150,6 +160,7 @@ tiempoUM            db   01 dup(30), "$"
 tiempoDM            db   01 dup(30), "$"
 retardoTiempo       dw   00
 errorAbrirArchivo   db   "Error Al Abrir El Archivo$"
+aux_char            db   00
 .CODE
 .STARTUP
 inicio:
@@ -201,8 +212,10 @@ menu:
 		;; > CARGAR NIVEL
 		cmp AL, 1
 		je modo_cargar_nivel
-		;; > CONFIGURACION
 		;; > PUNTAJES ALTOS
+		;; > CONFIGURACION
+		cmp AL, 3
+		je configuracion_controles
 		;; > SALIR
 		cmp AL, 4
 		je fin
@@ -1140,6 +1153,270 @@ pintar_flecha_menu_pausa:
 		jmp entrada_menu_pausa
 		;;
 fin_menu_pausa:
+		ret
+
+configuracion_controles:
+		call menu_config
+		mov AL, [opcion]
+		cmp AL, 00
+		je configurar_nuevos
+		cmp AL, 01
+		je menu
+		jmp configuracion_controles
+
+configurar_nuevos:
+		call clear_pantalla
+		mov DL, 07
+		mov DH, 07
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset ctrl_abajo
+		mov AH, 09
+		int 21
+		pop DX
+abajo_nuevo:
+		mov AH, 00
+		int 16
+		cmp AH, 00
+		je abajo_nuevo
+		;mov [aux_char], AL
+		mov [control_abajo], AH
+		;;;;;;;;;;;;;;;;;;;;;;;;;;
+		;;;;;;;;;;;;;;;;;;;;;;;;;;
+		call clear_pantalla
+		mov DL, 07
+		mov DH, 07
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset ctrl_arriba
+		mov AH, 09
+		int 21
+		pop DX
+arriba_nuevo:
+		mov AH, 00
+		int 16
+		cmp AH, 00
+		je arriba_nuevo
+		;mov [aux_char], AL
+		mov [control_arriba], AH
+		;;;;;;;;;;;;;;;;;;;;;;;;;;
+		;;;;;;;;;;;;;;;;;;;;;;;;;;
+		call clear_pantalla
+		mov DL, 07
+		mov DH, 07
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset ctrl_der
+		mov AH, 09
+		int 21
+		pop DX
+der_nuevo:
+		mov AH, 00
+		int 16
+		cmp AH, 00
+		je der_nuevo
+		;mov [aux_char], AL
+		mov [control_derecha], AH
+		;;;;;;;;;;;;;;;;;;;;;;;;;;
+		;;;;;;;;;;;;;;;;;;;;;;;;;;
+		call clear_pantalla
+		mov DL, 07
+		mov DH, 07
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset ctrl_izq
+		mov AH, 09
+		int 21
+		pop DX
+izq_nuevo:
+		mov AH, 00
+		int 16
+		cmp AH, 00
+		je izq_nuevo
+		;mov [aux_char], AL
+		mov [control_izquierda], AH
+		;;;;;;;;;;;;;;;;;;;;;;;;;;
+		;;;;;;;;;;;;;;;;;;;;;;;;;;
+		jmp configuracion_controles
+
+;; menu_principal - menu principal
+;; ..
+;; SALIDA
+;;    - [opcion] -> código numérico de la opción elegida
+menu_config:
+		call clear_pantalla
+		;; IMPRIMIR OPCIONES ;;
+		;;;; SOKOBAN
+		mov DL, 10
+		mov DH, 05
+		mov BH, 00
+		mov AH, 02
+		int 10
+		;; <<-- posicionar el cursor
+		push DX
+		mov DX, offset controles_actuales
+		mov AH, 09
+		int 21
+		pop DX
+		;;
+		mov AL, 00
+		mov [opcion], AL      ;; reinicio de la variable de salida
+		mov AL, 02
+		mov [maximo], AL
+		mov AX, 5a
+		mov BX, 88
+		mov [xFlecha], AX
+		mov [yFlecha], BX
+		;; IMPRIMIR OPCIONES ;;
+		;;;; INICIAR JUEGO
+		mov DL, 07
+		mov DH, 07
+		mov BH, 00
+		mov AH, 02
+		int 10
+		;; <<-- posicionar el cursor
+		push DX
+		mov DX, offset ctrl_arriba
+		mov AH, 09
+		int 21
+		mov DX, offset char_arriba
+		mov AH, 09
+		int 21
+		pop DX
+		;;
+		;;;; CARGAR NIVEL
+		add DH, 02
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset ctrl_abajo
+		mov AH, 09
+		int 21
+		mov DX, offset char_abajo
+		mov AH, 09
+		int 21
+		pop DX
+		;;
+		;;;; PUNTAJES ALTOS
+		add DH, 02
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset ctrl_izq
+		mov AH, 09
+		int 21
+		mov DX, offset char_izq
+		mov AH, 09
+		int 21
+		pop DX
+		;;
+		;;;; CONFIGURACION
+		add DH, 02
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset ctrl_der
+		mov AH, 09
+		int 21
+		mov DX, offset char_der
+		mov AH, 09
+		int 21
+		pop DX
+		;;
+		add DH, 02
+		mov DL, 0d
+		;;;; CAMBIAR CONTROLES
+		add DH, 02
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset cambiar_controles
+		mov AH, 09
+		int 21
+		pop DX
+		;;;; SALIR
+		add DH, 02
+		mov BH, 00
+		mov AH, 02
+		int 10
+		push DX
+		mov DX, offset salir
+		mov AH, 09
+		int 21
+		pop DX
+		;;;;
+		call pintar_flecha
+		;;;;
+		;; LEER TECLA
+		;;;;
+entrada_menu_config:
+		mov AH, 00
+		int 16
+		cmp AH, 48
+		je restar_opcion_menu_config
+		cmp AH, 50
+		je sumar_opcion_menu_config
+		cmp AH, 3b  ;; le doy F1
+		je fin_menu_config
+		jmp entrada_menu_config
+restar_opcion_menu_config:
+		mov AL, [opcion]
+		dec AL
+		cmp AL, 0ff
+		je volver_a_cero_config
+		mov [opcion], AL
+		jmp mover_flecha_menu_config
+sumar_opcion_menu_config:
+		mov AL, [opcion]
+		mov AH, [maximo]
+		inc AL
+		cmp AL, AH
+		je volver_a_maximo_config
+		mov [opcion], AL
+		jmp mover_flecha_menu_config
+volver_a_cero_config:
+		mov AL, 0
+		mov [opcion], AL
+		jmp mover_flecha_menu_config
+volver_a_maximo_config:
+		mov AL, [maximo]
+		dec AL
+		mov [opcion], AL
+		jmp mover_flecha_menu_config
+mover_flecha_menu_config:
+		mov AX, [xFlecha]
+		mov BX, [yFlecha]
+		mov SI, offset dim_sprite_vacio
+		mov DI, offset data_sprite_vacio
+		call pintar_sprite
+		mov AX, 5a
+		mov BX, 88
+		mov CL, [opcion]
+ciclo_ubicar_flecha_menu_config:
+		cmp CL, 0
+		je pintar_flecha_menu_config
+		dec CL
+		add BX, 10
+		jmp ciclo_ubicar_flecha_menu_config
+pintar_flecha_menu_config:
+		mov [xFlecha], AX
+		mov [yFlecha], BX
+		call pintar_flecha
+		jmp entrada_menu_config
+		;;
+fin_menu_config:
 		ret
 
 ;; entrada_juego - manejo de las entradas del juego

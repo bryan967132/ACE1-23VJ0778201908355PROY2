@@ -28,8 +28,13 @@ Inicialmentes puede controlarse el personaje jugable con las flechas del teclado
 En esta opción se podrá retornar nuevamenta al juego para continuar la última partida o finalizarla e ir al menú principal.
 ![Menú Pausa](./Images/Pausa.png "Menú Pausa")  
 ### Cargar Nivel
-En esta opción se podrán cargar nuevos niveles que no estén entre los predeterminados. Se cargará ingresando el nombre del archivo con su extensión.
+En esta opción se podrán cargar nuevos niveles que no estén entre los predeterminados. Se cargará ingresando el nombre del archivo con su extensión.  
 ![Cargar Nivel](./Images/CargarNivel.png "Cargar Nivel")  
+### Configuración De Controles
+En esta opción se podrán ver los controles configurados actualmente. 
+![Configuración](./Images/Configuracion.png "Configuración")  
+Además se podrá modificar dicha configuración.  
+![Configuración](./Images/ConfiguracionD.png "Configuración")  
 ### Objetos
 Existen diferentes objetos en el entorno del juego.  
 | No. | Objeto | No. | Objeto | No. | Objeto |
