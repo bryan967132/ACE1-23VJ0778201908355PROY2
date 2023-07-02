@@ -136,13 +136,17 @@ buffer_entrada      db   21, 00
 nombre_archivo_nvl  db   "NOMBRE DEL ARCHIVO$"
 de_nivel            db   " DE NIVEL: $"
 ;; PANTALLA INICIAL
-movimientos         db   30, "$"
+movimientosM        db   01 dup (30), "$"
+movimientosC        db   01 dup (30), "$"
+movimientosD        db   01 dup (30), "$"
+movimientosU        db   01 dup (30), "$"
 sokoban             db   "SOKOBAN$"
 tiempoUS            db   01 dup(30), "$"
 tiempoDS            db   01 dup(30), "$"
 dospuntos           db   ":$"
 tiempoUM            db   01 dup(30), "$"
 tiempoDM            db   01 dup(30), "$"
+retardoTiempo       db   00
 .CODE
 .STARTUP
 inicio:
@@ -153,18 +157,8 @@ inicio:
 		;;;;;;;;;;;;;;;;
 
 pantalla_inicial:
-		;; <<-- POSICIONAR EL CURSOR
-		mov DL, 24        ; COLUMNA
-		mov DH, 00        ; FILA
-		mov BH, 00        ; NÚMERO DE PÁGINA
-		mov AH, 02
-		int 10
-		;; IMPRESIÓN DEL MENSAJE
-		push DX
-		mov DX, offset movimientos
-		mov AH, 09
-		int 21
-		pop DX
+		;;;;;;;;;;;IMPRESIÓN MOVIMIENTOS;;;;;;;
+		call imprimirMovimientos
 		;; <<-- POSICIONAR EL CURSOR
 		mov DL, 10        ; COLUMNA
 		mov DH, 0b        ; FILA
@@ -177,19 +171,9 @@ pantalla_inicial:
 		mov AH, 09
 		int 21
 		pop DX
-		;; <<-- POSICIONAR EL CURSOR
-		mov DL, 01        ; COLUMNA
-		mov DH, 18        ; FILA
-		mov BH, 00        ; NÚMERO DE PÁGINA
-		mov AH, 02
-		int 10
-		;; IMPRESIÓN DEL MENSAJE
-		push DX
-		mov DX, offset iniciales
-		mov AH, 09
-		int 21
-		pop DX
-		;;;;;;;;;;;IMPRESION TIEMPO;;;;;;;;;;;;;
+		;;;;;;;;;;;IMPRESIÓN INICIALES;;;;;;;;;;
+		call imprimirIniciales
+		;;;;;;;;;;;IMPRESIÓN TIEMPO;;;;;;;;;;;;;
 		call imprimirTiempo
 		call delay
 		call delay
@@ -223,6 +207,8 @@ menu:
 		;;;;;;;;;;;;;;;;
 
 modo_juego:
+		call limpiarTiempo
+		call limpiarMovs
 		cmp [numeroNivel], 01
 		je cargar_nivel1
 		cmp [numeroNivel], 02
@@ -288,12 +274,17 @@ leer_entrada_buffer:
 
 ciclo_juego:
 		call pintar_mapa
+		call imprimirIniciales
 ciclo_juego1:
 		mov AL, [cant_sobrepuestos]
 		cmp [cant_objetivos], AL
 		je avanzar_nivel
 		call pintar_jugador_perimetro
+		call imprimirMovimientos
+		call imprimirTiempo
+		call incrementarTiempo
 		call entrada_juego
+		inc retardoTiempo
 		jmp ciclo_juego1
 
 avanzar_nivel:
@@ -1124,6 +1115,7 @@ continuar1:
 		call colocar_en_mapa
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
+		call incrementarMovs
 		ret
 devolver_objetivo1:
 		mov BL, [hay_objetivo_sig]
@@ -1134,6 +1126,7 @@ devolver_objetivo1:
 		call colocar_en_mapa
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
+		call incrementarMovs
 		ret
 hay_pared_arriba:
 		mov [hay_objetivo_sig], 00
@@ -1243,6 +1236,7 @@ continuar2:
 		call colocar_en_mapa
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
+		call incrementarMovs
 		ret
 devolver_objetivo2:
 		mov BL, [hay_objetivo_sig]
@@ -1253,6 +1247,7 @@ devolver_objetivo2:
 		call colocar_en_mapa
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
+		call incrementarMovs
 		ret
 hay_pared_abajo:
 		mov [hay_objetivo_sig], 00
@@ -1362,6 +1357,7 @@ continuar3:
 		call colocar_en_mapa
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
+		call incrementarMovs
 		ret
 devolver_objetivo3:
 		mov BL, [hay_objetivo_sig]
@@ -1372,6 +1368,7 @@ devolver_objetivo3:
 		call colocar_en_mapa
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
+		call incrementarMovs
 		ret
 hay_pared_izquierda:
 		mov [hay_objetivo_sig], 00
@@ -1481,6 +1478,7 @@ continuar4:
 		call colocar_en_mapa
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
+		call incrementarMovs
 		ret
 devolver_objetivo4:
 		mov BL, [hay_objetivo_sig]
@@ -1491,6 +1489,7 @@ devolver_objetivo4:
 		call colocar_en_mapa
 		mov AL, [cant_sobrepuestos]
 		mov [cant_sobre_aux], AL
+		call incrementarMovs
 		ret
 hay_pared_derecha:
 		mov [hay_objetivo_sig], 00
@@ -1690,6 +1689,100 @@ lengthBuffer:
 		mov AL, [DI]
 		ret
 
+imprimirMovimientos:
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 20        ; COLUMNA
+		mov DH, 00        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset movimientosM
+		mov AH, 09
+		int 21
+		pop DX
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 21        ; COLUMNA
+		mov DH, 00        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset movimientosC
+		mov AH, 09
+		int 21
+		pop DX
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 22        ; COLUMNA
+		mov DH, 00        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset movimientosD
+		mov AH, 09
+		int 21
+		pop DX
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 23        ; COLUMNA
+		mov DH, 00        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset movimientosU
+		mov AH, 09
+		int 21
+		pop DX
+		ret
+
+limpiarMovs:
+		mov [movimientosM], 30
+		mov [movimientosC], 30
+		mov [movimientosD], 30
+		mov [movimientosU], 30
+		ret
+
+incrementarMovs:
+		cmp [movimientosU], 39
+		je incrementarDecenasUnits
+		inc movimientosU
+		ret
+incrementarDecenasUnits:
+		mov [movimientosU], 30
+		cmp [movimientosD], 39
+		je incrementarCentenasUnits
+		inc movimientosD
+		ret
+incrementarCentenasUnits:
+		mov [movimientosD], 30
+		cmp [movimientosC], 39
+		je incrementarMilesUnits
+		inc movimientosC
+		ret
+incrementarMilesUnits:
+		inc movimientosM
+		ret
+
+imprimirIniciales:
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 01        ; COLUMNA
+		mov DH, 18        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset iniciales
+		mov AH, 09
+		int 21
+		pop DX
+		ret
+
 imprimirTiempo:
 		;; <<-- POSICIONAR EL CURSOR
 		mov DL, 20        ; COLUMNA
@@ -1751,6 +1844,39 @@ imprimirTiempo:
 		mov AH, 09
 		int 21
 		pop DX
+		ret
+
+limpiarTiempo:
+		mov [tiempoUS], 30
+		mov [tiempoDS], 30
+		mov [tiempoUM], 30
+		mov [tiempoDM], 30
+		ret
+
+incrementarTiempo:
+		cmp [retardoTiempo], 0ff
+		je incrementarTiempo1
+		ret
+incrementarTiempo1:
+		mov [retardoTiempo], 00
+		cmp [tiempoUS], 39
+		je incrementarDecenasSegundos
+		inc tiempoUS
+		ret
+incrementarDecenasSegundos:
+		mov [tiempoUS], 30
+		cmp [tiempoDS], 35
+		je incrementarUnidadesMinutos
+		inc tiempoDS
+		ret
+incrementarUnidadesMinutos:
+		mov [tiempoDS], 30
+		cmp [tiempoUM], 39
+		je incrementarDecenasMinutos
+		inc tiempoUM
+		ret
+incrementarDecenasMinutos:
+		inc tiempoDM
 		ret
 
 fin:
