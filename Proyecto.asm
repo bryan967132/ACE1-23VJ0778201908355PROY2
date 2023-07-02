@@ -133,8 +133,11 @@ hay_caja            db   00
 buffer_entrada      db   21, 00
                     db   21 dup (0)
 ;; CARGA DE NIVEL
-nombre_archivo_nvl  db   "Nombre Del Archivo$"
-de_nivel            db   " De Nivel: $"
+nombre_archivo_nvl  db   "NOMBRE DEL ARCHIVO$"
+de_nivel            db   " DE NIVEL: $"
+;; PANTALLA INICIAL
+movimientos         db   "0000$"
+sokoban             db   "SOKOBAN$"
 .CODE
 .STARTUP
 inicio:
@@ -143,6 +146,57 @@ inicio:
 		mov AL, 13
 		int 10
 		;;;;;;;;;;;;;;;;
+
+pantalla_inicial:
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 24        ; COLUMNA
+		mov DH, 00        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset movimientos
+		mov AH, 09
+		int 21
+		pop DX
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 10        ; COLUMNA
+		mov DH, 0b        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset sokoban
+		mov AH, 09
+		int 21
+		pop DX
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 01        ; COLUMNA
+		mov DH, 17        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset iniciales
+		mov AH, 09
+		int 21
+		pop DX
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+
 menu:
 		mov [numeroNivel], 01
 		call menu_principal
