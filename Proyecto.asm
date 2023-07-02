@@ -136,8 +136,13 @@ buffer_entrada      db   21, 00
 nombre_archivo_nvl  db   "NOMBRE DEL ARCHIVO$"
 de_nivel            db   " DE NIVEL: $"
 ;; PANTALLA INICIAL
-movimientos         db   "0000$"
+movimientos         db   30, "$"
 sokoban             db   "SOKOBAN$"
+tiempoUS            db   01 dup(30), "$"
+tiempoDS            db   01 dup(30), "$"
+dospuntos           db   ":$"
+tiempoUM            db   01 dup(30), "$"
+tiempoDM            db   01 dup(30), "$"
 .CODE
 .STARTUP
 inicio:
@@ -174,7 +179,7 @@ pantalla_inicial:
 		pop DX
 		;; <<-- POSICIONAR EL CURSOR
 		mov DL, 01        ; COLUMNA
-		mov DH, 17        ; FILA
+		mov DH, 18        ; FILA
 		mov BH, 00        ; NÚMERO DE PÁGINA
 		mov AH, 02
 		int 10
@@ -184,6 +189,8 @@ pantalla_inicial:
 		mov AH, 09
 		int 21
 		pop DX
+		;;;;;;;;;;;IMPRESION TIEMPO;;;;;;;;;;;;;
+		call imprimirTiempo
 		call delay
 		call delay
 		call delay
@@ -1681,6 +1688,69 @@ copiarCampoAEstructura:
 lengthBuffer:
 		inc DI
 		mov AL, [DI]
+		ret
+
+imprimirTiempo:
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 20        ; COLUMNA
+		mov DH, 18        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset tiempoDM
+		mov AH, 09
+		int 21
+		pop DX
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 21        ; COLUMNA
+		mov DH, 18        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset tiempoUM
+		mov AH, 09
+		int 21
+		pop DX
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 22        ; COLUMNA
+		mov DH, 18        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset dospuntos
+		mov AH, 09
+		int 21
+		pop DX
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 23        ; COLUMNA
+		mov DH, 18        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset tiempoDS
+		mov AH, 09
+		int 21
+		pop DX
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 24        ; COLUMNA
+		mov DH, 18        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset tiempoUS
+		mov AH, 09
+		int 21
+		pop DX
 		ret
 
 fin:
