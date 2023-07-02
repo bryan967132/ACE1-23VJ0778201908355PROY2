@@ -29,7 +29,7 @@ En esta opción se podrán cargar nuevos niveles que no estén entre los predete
 ![Cargar Nivel](./Images/CargarNivel.png "Cargar Nivel")  
 ### Objetos
 Existen diferentes objetos en el entorno del juego.  
-|||||||
+| No. | Objeto | No. | Objeto | No. | Objeto |
 |:-|:-|:-|:-|:-|:-|
 | 1.| Pared | 2.| Suelo | 3.| Jugador |
 | 4.| Caja | 5.| Caja Sobre Objetivo | 6.| Objetivo |
