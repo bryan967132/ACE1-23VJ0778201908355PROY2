@@ -189,18 +189,18 @@ pantalla_inicial:
 		call imprimirIniciales
 		;;;;;;;;;;;IMPRESIÓN TIEMPO;;;;;;;;;;;;;
 		call imprimirTiempo
-		;call delay
-		;call delay
-		;call delay
-		;call delay
-		;call delay
-		;call delay
-		;call delay
-		;call delay
-		;call delay
-		;call delay
-		;call delay
-		;call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
 
 menu:
 		mov [numeroNivel], 01
