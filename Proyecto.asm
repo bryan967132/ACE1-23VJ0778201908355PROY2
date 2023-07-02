@@ -147,6 +147,7 @@ dospuntos           db   ":$"
 tiempoUM            db   01 dup(30), "$"
 tiempoDM            db   01 dup(30), "$"
 retardoTiempo       dw   00
+errorAbrirArchivo   db   "Error Al Abrir El Archivo$"
 .CODE
 .STARTUP
 inicio:
@@ -230,6 +231,10 @@ cargar_nivel3:
 modo_cargar_nivel:
 		call limpiarTiempo
 		call limpiarMovs
+		mov DI, offset nivel_x
+		mov CX, 20
+		mov AL, 00
+		call memset
 		;;
 		call clear_pantalla
 		;; ENTRADA
@@ -302,7 +307,16 @@ cargar_un_nivel:
 		mov AL, 00
 		mov AH, 3d
 		int 21
-		jc inicio
+		jnc continuar_carga_nivel
+		call clear_pantalla
+		call errorArchivo
+		call delay
+		call delay
+		call delay
+		call delay
+		call delay
+		jmp menu
+continuar_carga_nivel:
 		mov [handle_nivel], AX
 		mov DI, offset mapa
 		mov CX, 3e8
@@ -1904,6 +1918,21 @@ incrementarUnidadesMinutos:
 		ret
 incrementarDecenasMinutos:
 		inc tiempoDM
+		ret
+
+errorArchivo:
+		;; <<-- POSICIONAR EL CURSOR
+		mov DL, 08        ; COLUMNA
+		mov DH, 0b        ; FILA
+		mov BH, 00        ; NÚMERO DE PÁGINA
+		mov AH, 02
+		int 10
+		;; IMPRESIÓN DEL MENSAJE
+		push DX
+		mov DX, offset errorAbrirArchivo
+		mov AH, 09
+		int 21
+		pop DX
 		ret
 
 fin:
