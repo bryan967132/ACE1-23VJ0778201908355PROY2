@@ -1060,6 +1060,9 @@ ciclo_pausa:
 		call menu_pausa
 		cmp [opcion], 0
 		je ciclo_juego
+		mov [cant_sobrepuestos], 00
+		mov [cant_sobre_aux], 00
+		mov [cant_objetivos], 00
 		jmp menu
 
 menu_pausa:
@@ -2311,6 +2314,7 @@ incrementarUnidadesMinutos:
 		inc tiempoUM
 		ret
 incrementarDecenasMinutos:
+		mov [tiempoUM], 30
 		inc tiempoDM
 		ret
 
