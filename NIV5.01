@@ -1,0 +1,187 @@
+# paredes
+pared 08, 01
+pared 09, 01
+pared 10, 01
+pared 11, 01
+pared 12, 01
+pared 13, 01
+-
+pared 08, 02
+suelo 09, 02
+suelo 10, 02
+suelo 11, 02
+pared 12, 02
+pared 13, 02
+pared 14, 02
+pared 15, 02
+pared 16, 02
+-
+pared 08, 03
+suelo 09, 03
+pared 10, 03
+suelo 11, 03
+pared 12, 03
+pared 13, 03
+suelo 14, 03
+suelo 15, 03
+pared 16, 03
+-
+pared 08, 04
+suelo 09, 04
+suelo 10, 04
+suelo 11, 04
+suelo 12, 04
+suelo 13, 04
+suelo 14, 04
+suelo 15, 04
+pared 16, 04
+-
+pared 00, 05
+pared 01, 05
+pared 02, 05
+pared 03, 05
+pared 04, 05
+pared 05, 05
+pared 06, 05
+pared 07, 05
+pared 08, 05
+suelo 09, 05
+pared 10, 05
+pared 11, 05
+pared 12, 05
+suelo 13, 05
+suelo 14, 05
+suelo 15, 05
+pared 16, 05
+-
+pared 00, 06
+suelo 01, 06
+suelo 02, 06
+suelo 03, 06
+suelo 04, 06
+suelo 05, 06
+suelo 06, 06
+pared 07, 06
+pared 08, 06
+suelo 09, 06
+suelo 10, 06
+suelo 11, 06
+suelo 12, 06
+suelo 13, 06
+pared 14, 06
+pared 15, 06
+pared 16, 06
+-
+pared 00, 07
+suelo 01, 07
+suelo 02, 07
+suelo 03, 07
+suelo 04, 07
+suelo 05, 07
+suelo 06, 07
+suelo 07, 07
+suelo 08, 07
+suelo 09, 07
+suelo 10, 07
+suelo 11, 07
+suelo 12, 07
+suelo 13, 07
+pared 14, 07
+pared 15, 07
+-
+pared 00, 08
+suelo 01, 08
+suelo 02, 08
+suelo 03, 08
+suelo 04, 08
+suelo 05, 08
+suelo 06, 08
+pared 07, 08
+pared 08, 08
+suelo 09, 08
+suelo 10, 08
+suelo 11, 08
+suelo 12, 08
+suelo 13, 08
+suelo 14, 08
+pared 15, 08
+-
+pared 00, 09
+pared 01, 09
+pared 02, 09
+pared 03, 09
+pared 04, 09
+pared 05, 09
+pared 06, 09
+pared 07, 09
+pared 08, 09
+suelo 09, 09
+suelo 10, 09
+suelo 11, 09
+suelo 12, 09
+suelo 13, 09
+pared 14, 09
+pared 15, 09
+-
+pared 08, 10
+suelo 09, 10
+suelo 10, 10
+suelo 11, 10
+suelo 12, 10
+suelo 13, 10
+suelo 14, 10
+pared 15, 10
+-
+pared 08, 11
+pared 09, 11
+pared 10, 11
+suelo 11, 11
+pared 12, 11
+pared 13, 11
+suelo 14, 11
+pared 15, 11
+-
+pared 10, 12
+suelo 11, 12
+suelo 12, 12
+suelo 13, 12
+suelo 14, 12
+pared 15, 12
+-
+pared 10, 13
+pared 11, 13
+pared 12, 13
+pared 13, 13
+pared 14, 13
+pared 15, 13
+
+# cajas
+caja  11, 03
+caja  14, 04
+caja  10, 06
+caja  13, 06
+caja  09, 07
+caja  11, 07
+caja  12, 07
+caja  09, 08
+caja  12, 08
+caja  11, 09
+caja  10, 10
+caja  12, 10
+
+# objetivos
+objetivo 01, 06
+objetivo 02, 06
+objetivo 03, 06
+objetivo 04, 06
+objetivo 01, 07
+objetivo 02, 07
+objetivo 03, 07
+objetivo 04, 07
+objetivo 01, 08
+objetivo 02, 08
+objetivo 03, 08
+objetivo 04, 08
+
+# jugador
+jugador  14, 08
