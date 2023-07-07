@@ -2235,6 +2235,7 @@ incrementarCentenasUnits:
 		inc movimientosC
 		ret
 incrementarMilesUnits:
+		mov [movimientosC], 30
 		inc movimientosM
 		ret
 
