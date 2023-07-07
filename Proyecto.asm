@@ -116,9 +116,12 @@ control_izquierda   db   4b
 control_derecha     db   4d
 ;; NIVELES
 nivel_x             db   20 dup (0), 00
-nivel1              db   "NIV.00", 00
-nivel2              db   "NIV.01", 00
-nivel3              db   "NIV.10", 00
+nivel1              db   "NIV0.00", 00
+nivel2              db   "NIV1.01", 00
+nivel3              db   "NIV2.10", 00
+nivel4              db   "NIV3.11", 00
+nivel5              db   "NIV4.00", 00
+nivel6              db   "NIV5.01", 00
 handle_nivel        dw   0000
 linea               db   100 dup (0)
 elemento_actual     db   0
@@ -225,23 +228,21 @@ menu:
 modo_juego:
 		call limpiarTiempo
 		call limpiarMovs
+		cmp [numeroNivel], 00
+		je cargar_nivelx
 		cmp [numeroNivel], 01
 		je cargar_nivel1
 		cmp [numeroNivel], 02
 		je cargar_nivel2
 		cmp [numeroNivel], 03
 		je cargar_nivel3
+		cmp [numeroNivel], 04
+		je cargar_nivel4
+		cmp [numeroNivel], 05
+		je cargar_nivel5
+		cmp [numeroNivel], 06
+		je cargar_nivel6
 		jmp menu
-
-cargar_nivel1:
-		mov DX, offset nivel1
-		jmp cargar_un_nivel
-cargar_nivel2:
-		mov DX, offset nivel2
-		jmp cargar_un_nivel
-cargar_nivel3:
-		mov DX, offset nivel3
-		jmp cargar_un_nivel
 
 modo_cargar_nivel:
 		call limpiarTiempo
@@ -291,6 +292,27 @@ leer_entrada_buffer:
 		mov DI, offset buffer_entrada
 		call memcpy
 		mov [numeroNivel], 00
+		jmp cargar_nivelx
+
+cargar_nivel1:
+		mov DX, offset nivel1
+		jmp cargar_un_nivel
+cargar_nivel2:
+		mov DX, offset nivel2
+		jmp cargar_un_nivel
+cargar_nivel3:
+		mov DX, offset nivel3
+		jmp cargar_un_nivel
+cargar_nivel4:
+		mov DX, offset nivel4
+		jmp cargar_un_nivel
+cargar_nivel5:
+		mov DX, offset nivel5
+		jmp cargar_un_nivel
+cargar_nivel6:
+		mov DX, offset nivel6
+		jmp cargar_un_nivel
+cargar_nivelx:
 		mov DX, offset nivel_x
 		jmp cargar_un_nivel
 
@@ -1422,6 +1444,14 @@ pintar_flecha_menu_config:
 fin_menu_config:
 		ret
 
+reiniciar_nivel:
+		mov [cant_sobrepuestos], 00
+		mov [cant_sobre_aux], 00
+		mov [cant_objetivos], 00
+		mov [hay_objetivo_act], 00
+		mov [hay_objetivo_sig], 00
+		jmp modo_juego
+
 ;; entrada_juego - manejo de las entradas del juego
 entrada_juego:
 		mov AH, 01
@@ -1432,6 +1462,8 @@ entrada_juego:
 		;; AH <- scan code
 		cmp AH, 3c
 		je ciclo_pausa
+		cmp AH, 3d
+		je reiniciar_nivel
 		cmp AH, [control_arriba]
 		je mover_jugador_arr
 		cmp AH, [control_abajo]
